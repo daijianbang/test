@@ -1,0 +1,104 @@
+#!/usr/bin/env python
+
+import os
+#指定图像文件名称
+import serial
+#导入serial库
+import pygame
+#导入pygame库
+from pygame.locals import *
+#导入一些常用的函数和常量
+from sys import exit
+#向sys模块借一个exit函数用来退出程序
+from time import sleep
+import serial.tools.list_ports
+
+background_image_filename = os.path.split(os.path.abspath(__file__))[0]+'\\1.jpg'
+
+def recv(serial):
+    while True:
+        data = serial.readline()
+        global A
+        global B
+        global C
+        global D
+        A=int(data.split()[0])
+        B=int(data.split()[1])
+        C=int(data.split()[2])
+        D=int(data.split()[3])
+        #for i in range(0, 10):
+        #	print(i,":",data[i])
+  
+        if data == '':
+            continue
+        else:
+            break
+        sleep(0.02)
+    return data
+
+plist = list(serial.tools.list_ports.comports())
+if len(plist) <= 0:
+    print ("The Serial port can't find!")
+else:
+    plist_0 =list(plist[0])
+    serialName = plist_0[0]
+    ser= serial.Serial(serialName,115200,timeout = 60)
+pygame.init()
+#初始化pygame,为使用硬件做准备
+screen = pygame.display.set_mode((640,480), 0, 32)
+#创建了一个窗口
+pygame.display.set_caption("多功能答题系统")
+#设置窗口标题
+background = pygame.image.load(background_image_filename).convert()
+#加载并转换图像
+
+while True:
+#游戏主循环
+ 
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            #接收到退出事件后退出程序
+            ser.close()
+            exit()
+ 
+    screen.blit(background, (0,0))
+    #将背景图画上去
+    #print(ser.readline());
+    data =recv(ser)
+    #if data == b'A' :
+    	#A=50
+
+    RED=(255,0,0)
+    GREEN=(0,255,0)
+    BLUE=(0,0,255)
+    YELLOW=(0,255,255)
+
+    pygame.draw.rect(screen,RED,[100,400,50,A*-8],0)
+    pygame.draw.rect(screen,GREEN,[200,400,50,B*-8],0)
+    pygame.draw.rect(screen,BLUE,[300,400,50,C*-8],0)
+    pygame.draw.rect(screen,YELLOW,[400,400,50,D*-8],0)
+
+    fontObj = pygame.font.Font(os.path.split(os.path.abspath(__file__))[0]+'\\arial.ttf',32)
+    textSurfaceObj = fontObj.render(str(A), True,GREEN)
+    textRectObj = textSurfaceObj.get_rect()
+    textRectObj.center = (120, 450)
+    screen.blit(textSurfaceObj, textRectObj)
+
+    textSurfaceObj = fontObj.render(str(B), True,GREEN)
+    textRectObj = textSurfaceObj.get_rect()
+    textRectObj.center = (220, 450)
+    screen.blit(textSurfaceObj, textRectObj)
+
+    textSurfaceObj = fontObj.render(str(C), True,GREEN)
+    textRectObj = textSurfaceObj.get_rect()
+    textRectObj.center = (320, 450)
+    screen.blit(textSurfaceObj, textRectObj)
+
+    textSurfaceObj = fontObj.render(str(D), True,GREEN)
+    textRectObj = textSurfaceObj.get_rect()
+    textRectObj.center = (420, 450)
+    screen.blit(textSurfaceObj, textRectObj)
+
+
+    pygame.display.update()
+    #刷新一下画面
